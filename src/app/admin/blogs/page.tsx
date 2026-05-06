@@ -1,136 +1,20 @@
-'use client';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Plus, Edit, Trash2, Loader2, FileText } from 'lucide-react';
-import axios from 'axios';
-import DeleteModal from '@/components/DeleteModal';
+import connectDB from '@/lib/mongodb';
+import Blog from '@/models/Blog';
+import AdminBlogsClient from './AdminBlogsClient';
 
-export default function AdminBlogs() {
-  const [blogs, setBlogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBlog, setSelectedBlog] = useState<any>(null);
-
-  const fetchBlogs = async () => {
-    try {
-      const response = await axios.get('/api/blogs');
-      setBlogs(response.data);
-    } catch (error) {
-      console.error('Error fetching blogs:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
-
-  const openDeleteModal = (blog: any) => {
-    setSelectedBlog(blog);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedBlog) return;
-    
-    try {
-      await axios.delete(`/api/blogs/${selectedBlog._id}`);
-      setBlogs(blogs.filter(b => b._id !== selectedBlog._id));
-      setIsModalOpen(false);
-      setSelectedBlog(null);
-    } catch (error) {
-      console.error('Error deleting blog:', error);
-      alert('Failed to delete blog');
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
-    );
+async function getBlogs() {
+  try {
+    await connectDB();
+    const blogs = await Blog.find({}).sort({ createdAt: -1 }).lean();
+    return JSON.parse(JSON.stringify(blogs));
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    return [];
   }
+}
 
-  return (
-    <div className="space-y-6">
-      <DeleteModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={handleDelete}
-        title={selectedBlog?.title || ''}
-      />
-      
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Manage Blogs</h2>
-        <Link 
-          href="/admin/blogs/new" 
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add New Post
-        </Link>
-      </div>
+export default async function AdminBlogs() {
+  const blogs = await getBlogs();
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-600">Post Info</th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-600">Author</th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-600">Date</th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-600">Status</th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-600 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {blogs.length === 0 ? (
-              <tr>
-                <td className="px-6 py-8 text-center text-gray-500 italic" colSpan={5}>
-                  No blog posts found. Share your first insight!
-                </td>
-              </tr>
-            ) : (
-              blogs.map((blog) => (
-                <tr key={blog._id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{blog.title}</div>
-                    <div className="text-xs text-gray-500 truncate max-w-xs">{blog.excerpt}</div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {blog.author}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {new Date(blog.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      blog.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {blog.published ? 'Published' : 'Draft'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    <Link 
-                      href={`/admin/blogs/${blog._id}`}
-                      className="inline-flex p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                      <Edit className="w-5 h-5" />
-                    </Link>
-                    <button 
-                      onClick={() => openDeleteModal(blog)}
-                      className="inline-flex p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+  return <AdminBlogsClient initialBlogs={blogs} />;
 }

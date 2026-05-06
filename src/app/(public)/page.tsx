@@ -1,5 +1,12 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, MapPin, Home as HomeIcon, Star, ArrowRight } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Roman Estate | Luxury Real Estate Mumbai',
+  description: 'Find your dream home in Mumbai with Roman Estate. Premium properties, luxury apartments, and exclusive commercial spaces.',
+};
 
 export default function HomePage() {
   return (
@@ -8,10 +15,13 @@ export default function HomePage() {
       <section className="relative h-[80vh] flex items-center justify-center bg-gray-900 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-black/50 z-10" />
-          <img 
+          <Image 
             src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000" 
             alt="Luxury Home" 
-            className="w-full h-full object-cover"
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
           />
         </div>
         
@@ -83,14 +93,15 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Sample Property Card */}
             {[1, 2, 3].map((i) => (
               <div key={i} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100">
                 <div className="relative h-64 overflow-hidden">
-                  <img 
-                    src={`https://images.unsplash.com/photo-${1500000000000 + i * 1000000}?auto=format&fit=crop&q=80&w=800`} 
+                  <Image 
+                    src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800" 
                     alt="Property" 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-blue-600 shadow-sm">
                     Featured
@@ -128,14 +139,16 @@ export default function HomePage() {
       {/* Services Teaser */}
       <section className="py-24 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div className="relative">
+          <div className="relative h-[400px] md:h-[500px]">
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-50 rounded-full z-0" />
-            <img 
+            <Image 
               src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1000" 
               alt="Our Service" 
-              className="relative z-10 rounded-3xl shadow-2xl"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="relative z-10 rounded-3xl shadow-2xl object-cover"
             />
-            <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl z-20 animate-bounce duration-3000">
+            <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl z-20">
                <p className="text-2xl font-bold text-blue-600">30+</p>
                <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Years Exp</p>
             </div>

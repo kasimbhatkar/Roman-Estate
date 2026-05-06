@@ -1,84 +1,83 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // RTK Query API Slice — single source of truth for all client-side API calls
 export const apiSlice = createApi({
-  reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
-  tagTypes: ['Property', 'Blog', 'Inquiry'],
+  reducerPath: "api",
+  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
+  tagTypes: ["Property", "Blog", "Inquiry"],
   endpoints: (builder) => ({
-
     // ─── Properties ───────────────────────────────────────
     createProperty: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/properties',
-        method: 'POST',
+        url: "/properties",
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: ['Property'],
+      invalidatesTags: ["Property"],
     }),
 
     updateProperty: builder.mutation<any, { id: string; data: any }>({
       query: ({ id, data }) => ({
         url: `/properties/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: ['Property'],
+      invalidatesTags: ["Property"],
     }),
 
     deleteProperty: builder.mutation<any, string>({
       query: (id) => ({
         url: `/properties/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['Property'],
+      invalidatesTags: ["Property"],
     }),
 
     getPropertyById: builder.query<any, string>({
       query: (id) => `/properties/${id}`,
-      providesTags: ['Property'],
+      providesTags: ["Property"],
     }),
 
     // ─── Blogs ────────────────────────────────────────────
     createBlog: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/blogs',
-        method: 'POST',
+        url: "/blogs",
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: ['Blog'],
+      invalidatesTags: ["Blog"],
     }),
 
     updateBlog: builder.mutation<any, { id: string; data: any }>({
       query: ({ id, data }) => ({
         url: `/blogs/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: ['Blog'],
+      invalidatesTags: ["Blog"],
     }),
 
     deleteBlog: builder.mutation<any, string>({
       query: (id) => ({
         url: `/blogs/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['Blog'],
+      invalidatesTags: ["Blog"],
     }),
 
     getBlogById: builder.query<any, string>({
       query: (id) => `/blogs/${id}`,
-      providesTags: ['Blog'],
+      providesTags: ["Blog"],
     }),
 
     // ─── Inquiries ────────────────────────────────────────
     submitInquiry: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/inquiries',
-        method: 'POST',
+        url: "/inquiries",
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: ['Inquiry'],
+      invalidatesTags: ["Inquiry"],
     }),
   }),
 });

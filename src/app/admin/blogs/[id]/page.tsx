@@ -3,13 +3,13 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import axios from 'axios';
+import { useGetBlogByIdQuery, useUpdateBlogMutation } from '@/lib/redux/slices/apiSlice';
 
 export default function EditBlog({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { data: blog, isLoading: loading, error: fetchError } = useGetBlogByIdQuery(id);
+  const [updateBlog, { isLoading: saving }] = useUpdateBlogMutation();
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -21,30 +21,25 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
   });
 
   useEffect(() => {
-    const fetchBlog = async () => {
-      try {
-        const response = await axios.get(`/api/blogs/${id}`);
-        const blog = response.data;
-        setFormData({
-          title: blog.title,
-          content: blog.content,
-          author: blog.author,
-          excerpt: blog.excerpt,
-          image: blog.image || '',
-          tags: blog.tags.join(', '),
-          published: blog.published,
-        });
-      } catch (error) {
-        console.error('Error fetching blog:', error);
-        alert('Failed to load blog post');
-        router.push('/admin/blogs');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (blog) {
+      setFormData({
+        title: blog.title,
+        content: blog.content,
+        author: blog.author,
+        excerpt: blog.excerpt,
+        image: blog.image || '',
+        tags: blog.tags.join(', '),
+        published: blog.published,
+      });
+    }
+  }, [blog]);
 
-    if (id) fetchBlog();
-  }, [id, router]);
+  useEffect(() => {
+    if (fetchError) {
+      alert('Failed to load blog post');
+      router.push('/admin/blogs');
+    }
+  }, [fetchError, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -56,20 +51,17 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     try {
       const dataToSubmit = {
         ...formData,
         tags: formData.tags.split(',').map(t => t.trim()).filter(t => t !== '')
       };
 
-      await axios.put(`/api/blogs/${id}`, dataToSubmit);
+      await updateBlog({ id, data: dataToSubmit }).unwrap();
       router.push('/admin/blogs');
     } catch (error) {
       console.error('Error updating blog:', error);
       alert('Failed to update blog post');
-    } finally {
-      setSaving(false);
     }
   };
 

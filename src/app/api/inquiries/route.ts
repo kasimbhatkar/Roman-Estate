@@ -7,6 +7,11 @@ export async function POST(request: Request) {
     await connectDB();
     const data = await request.json();
     
+    // Check for honeypot
+    if (data._honeypot) {
+      return NextResponse.json({ message: 'Spam detected' }, { status: 200 });
+    }
+
     // Basic validation
     if (!data.name || !data.email || !data.phone || !data.message) {
       return NextResponse.json({ error: 'Please fill all required fields' }, { status: 400 });
@@ -15,7 +20,14 @@ export async function POST(request: Request) {
     const inquiry = await Inquiry.create(data);
     return NextResponse.json({ message: 'Inquiry submitted successfully', inquiry }, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Inquiry POST Error:', error);
+    return NextResponse.json({ 
+      error: error.message || 'Failed to submit inquiry',
+      details: error.errors ? Object.keys(error.errors).map(key => ({
+        field: key,
+        message: error.errors[key].message
+      })) : null
+    }, { status: 500 });
   }
 }
 
@@ -25,6 +37,7 @@ export async function GET() {
     const inquiries = await Inquiry.find({}).sort({ createdAt: -1 });
     return NextResponse.json(inquiries);
   } catch (error: any) {
+    console.error('Inquiry GET Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

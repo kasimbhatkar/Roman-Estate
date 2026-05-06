@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Plus, Edit, Trash2 } from 'lucide-react';
-import axios from 'axios';
+import { useDeleteBlogMutation } from '@/lib/redux/slices/apiSlice';
 import DeleteModal from '@/components/DeleteModal';
 
 interface AdminBlogsClientProps {
@@ -13,6 +13,7 @@ export default function AdminBlogsClient({ initialBlogs }: AdminBlogsClientProps
   const [blogs, setBlogs] = useState<any[]>(initialBlogs);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState<any>(null);
+  const [deleteBlog] = useDeleteBlogMutation();
 
   const openDeleteModal = (blog: any) => {
     setSelectedBlog(blog);
@@ -23,7 +24,7 @@ export default function AdminBlogsClient({ initialBlogs }: AdminBlogsClientProps
     if (!selectedBlog) return;
     
     try {
-      await axios.delete(`/api/blogs/${selectedBlog._id}`);
+      await deleteBlog(selectedBlog._id).unwrap();
       setBlogs(blogs.filter(b => b._id !== selectedBlog._id));
       setIsModalOpen(false);
       setSelectedBlog(null);

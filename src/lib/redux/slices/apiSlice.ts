@@ -1,0 +1,97 @@
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
+// RTK Query API Slice — single source of truth for all client-side API calls
+export const apiSlice = createApi({
+  reducerPath: 'api',
+  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
+  tagTypes: ['Property', 'Blog', 'Inquiry'],
+  endpoints: (builder) => ({
+
+    // ─── Properties ───────────────────────────────────────
+    createProperty: builder.mutation<any, any>({
+      query: (data) => ({
+        url: '/properties',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Property'],
+    }),
+
+    updateProperty: builder.mutation<any, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/properties/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Property'],
+    }),
+
+    deleteProperty: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/properties/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Property'],
+    }),
+
+    getPropertyById: builder.query<any, string>({
+      query: (id) => `/properties/${id}`,
+      providesTags: ['Property'],
+    }),
+
+    // ─── Blogs ────────────────────────────────────────────
+    createBlog: builder.mutation<any, any>({
+      query: (data) => ({
+        url: '/blogs',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Blog'],
+    }),
+
+    updateBlog: builder.mutation<any, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/blogs/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Blog'],
+    }),
+
+    deleteBlog: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/blogs/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Blog'],
+    }),
+
+    getBlogById: builder.query<any, string>({
+      query: (id) => `/blogs/${id}`,
+      providesTags: ['Blog'],
+    }),
+
+    // ─── Inquiries ────────────────────────────────────────
+    submitInquiry: builder.mutation<any, any>({
+      query: (data) => ({
+        url: '/inquiries',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Inquiry'],
+    }),
+  }),
+});
+
+// Auto-generated hooks for every endpoint
+export const {
+  useCreatePropertyMutation,
+  useUpdatePropertyMutation,
+  useDeletePropertyMutation,
+  useGetPropertyByIdQuery,
+  useCreateBlogMutation,
+  useUpdateBlogMutation,
+  useDeleteBlogMutation,
+  useGetBlogByIdQuery,
+  useSubmitInquiryMutation,
+} = apiSlice;

@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+import { useDeletePropertyMutation } from '@/lib/redux/slices/apiSlice';
 import DeleteModal from '@/components/DeleteModal';
 
 interface AdminPropertiesClientProps {
@@ -13,6 +13,7 @@ export default function AdminPropertiesClient({ initialProperties }: AdminProper
   const [properties, setProperties] = useState<any[]>(initialProperties);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [deleteProperty] = useDeletePropertyMutation();
 
   const openDeleteModal = (property: any) => {
     setSelectedProperty(property);
@@ -23,7 +24,7 @@ export default function AdminPropertiesClient({ initialProperties }: AdminProper
     if (!selectedProperty) return;
     
     try {
-      await axios.delete(`/api/properties/${selectedProperty._id}`);
+      await deleteProperty(selectedProperty._id).unwrap();
       setProperties(properties.filter(p => p._id !== selectedProperty._id));
       setIsModalOpen(false);
       setSelectedProperty(null);

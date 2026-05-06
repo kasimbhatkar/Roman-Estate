@@ -3,13 +3,13 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import axios from 'axios';
+import { useGetPropertyByIdQuery, useUpdatePropertyMutation } from '@/lib/redux/slices/apiSlice';
 
 export default function EditProperty({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { data: property, isLoading: loading, error: fetchError } = useGetPropertyByIdQuery(id);
+  const [updateProperty, { isLoading: saving }] = useUpdatePropertyMutation();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -27,36 +27,31 @@ export default function EditProperty({ params }: { params: Promise<{ id: string 
   });
 
   useEffect(() => {
-    const fetchProperty = async () => {
-      try {
-        const response = await axios.get(`/api/properties/${id}`);
-        const property = response.data;
-        setFormData({
-          title: property.title,
-          description: property.description,
-          price: property.price.toString(),
-          address: property.location.address,
-          area: property.location.area,
-          city: property.location.city,
-          type: property.type,
-          status: property.status,
-          bedrooms: property.bedrooms.toString(),
-          bathrooms: property.bathrooms.toString(),
-          size: property.size.toString(),
-          amenities: property.amenities.join(', '),
-          featured: property.featured,
-        });
-      } catch (error) {
-        console.error('Error fetching property:', error);
-        alert('Failed to load property data');
-        router.push('/admin/properties');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (property) {
+      setFormData({
+        title: property.title,
+        description: property.description,
+        price: property.price.toString(),
+        address: property.location.address,
+        area: property.location.area,
+        city: property.location.city,
+        type: property.type,
+        status: property.status,
+        bedrooms: property.bedrooms.toString(),
+        bathrooms: property.bathrooms.toString(),
+        size: property.size.toString(),
+        amenities: property.amenities.join(', '),
+        featured: property.featured,
+      });
+    }
+  }, [property]);
 
-    if (id) fetchProperty();
-  }, [id, router]);
+  useEffect(() => {
+    if (fetchError) {
+      alert('Failed to load property data');
+      router.push('/admin/properties');
+    }
+  }, [fetchError, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -68,7 +63,6 @@ export default function EditProperty({ params }: { params: Promise<{ id: string 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     try {
       const dataToSubmit = {
         ...formData,
@@ -84,13 +78,11 @@ export default function EditProperty({ params }: { params: Promise<{ id: string 
         amenities: formData.amenities.split(',').map(a => a.trim()).filter(a => a !== '')
       };
 
-      await axios.put(`/api/properties/${id}`, dataToSubmit);
+      await updateProperty({ id, data: dataToSubmit }).unwrap();
       router.push('/admin/properties');
     } catch (error) {
       console.error('Error updating property:', error);
       alert('Failed to update property');
-    } finally {
-      setSaving(false);
     }
   };
 

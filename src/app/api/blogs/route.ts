@@ -8,6 +8,7 @@ export async function GET() {
     const blogs = await Blog.find({}).sort({ createdAt: -1 });
     return NextResponse.json(blogs);
   } catch (error: any) {
+    console.error('Blog GET Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -18,13 +19,22 @@ export async function POST(request: Request) {
     const data = await request.json();
     
     // Generate slug from title if not provided
-    if (!data.slug) {
-      data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    if (!data.slug && data.title) {
+      data.slug = data.title.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
     }
 
     const blog = await Blog.create(data);
     return NextResponse.json(blog, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Blog POST Error:', error);
+    return NextResponse.json({ 
+      error: error.message || 'Failed to create blog',
+      details: error.errors ? Object.keys(error.errors).map(key => ({
+        field: key,
+        message: error.errors[key].message
+      })) : null
+    }, { status: 500 });
   }
 }

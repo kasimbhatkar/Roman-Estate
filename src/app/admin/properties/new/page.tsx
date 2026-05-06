@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Upload } from 'lucide-react';
 import Link from 'next/link';
-import axios from 'axios';
+import { useCreatePropertyMutation } from '@/lib/redux/slices/apiSlice';
 
 export default function NewProperty() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [createProperty, { isLoading }] = useCreatePropertyMutation();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -34,7 +34,6 @@ export default function NewProperty() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     try {
       const dataToSubmit = {
         ...formData,
@@ -50,13 +49,11 @@ export default function NewProperty() {
         amenities: formData.amenities.split(',').map(a => a.trim()).filter(a => a !== '')
       };
 
-      await axios.post('/api/properties', dataToSubmit);
+      await createProperty(dataToSubmit).unwrap();
       router.push('/admin/properties');
     } catch (error) {
       console.error('Error creating property:', error);
       alert('Failed to create property. Check console for details.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -69,11 +66,11 @@ export default function NewProperty() {
         </Link>
         <button 
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={isLoading}
           className="bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center hover:bg-blue-700 disabled:bg-blue-300"
         >
           <Save className="w-5 h-5 mr-2" />
-          {loading ? 'Saving...' : 'Save Property'}
+          {isLoading ? 'Saving...' : 'Save Property'}
         </button>
       </div>
 

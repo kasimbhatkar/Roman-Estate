@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
-import propertyReducer from './slices/propertySlice';
+import { apiSlice } from './slices/apiSlice';
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
-      properties: propertyReducer,
+      [apiSlice.reducerPath]: apiSlice.reducer,
     },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(apiSlice.middleware),
   });
 };
 

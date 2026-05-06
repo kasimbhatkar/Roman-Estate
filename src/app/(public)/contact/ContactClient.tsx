@@ -2,11 +2,7 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, MessageSquare, CheckCircle2, Loader2, Globe } from 'lucide-react';
 import Image from 'next/image';
-import axios from 'axios';
-
-// Metadata must be in a separate server component or the layout if we want it for a client component page.
-// Since this is a client component, I'll wrap it or just rely on the parent layout.
-// Actually, I'll convert the main page to a server component that renders the client form.
+import { useSubmitInquiryMutation } from '@/lib/redux/slices/apiSlice';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -16,7 +12,7 @@ export default function ContactPage() {
     message: '',
     _honeypot: '', // Honeypot field
   });
-  const [loading, setLoading] = useState(false);
+  const [submitInquiry, { isLoading: loading }] = useSubmitInquiryMutation();
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,16 +25,13 @@ export default function ContactPage() {
       return;
     }
 
-    setLoading(true);
     setError(null);
     try {
-      await axios.post('/api/inquiries', formData);
+      await submitInquiry(formData).unwrap();
       setSubmitted(true);
       setFormData({ name: '', email: '', phone: '', message: '', _honeypot: '' });
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
+      setError(err.data?.error || 'Something went wrong. Please try again.');
     }
   };
 
@@ -248,6 +241,7 @@ export default function ContactPage() {
             src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&q=80&w=2000" 
             alt="Office Location"
             fill
+            sizes="100vw"
             className="object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent" />

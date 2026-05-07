@@ -1,17 +1,23 @@
-import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Blog from '@/models/Blog';
+import { NextRequest, NextResponse } from "next/server";
+import connectDB from "@/lib/mongodb";
+import Blog from "@/models/Blog";
+import { revalidatePath } from "next/cache";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const dynamic = "force-dynamic";
+
+type Params = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export async function GET(request: NextRequest, context: Params) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
     await connectDB();
     const blog = await Blog.findById(id);
     if (!blog) {
-      return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
     return NextResponse.json(blog);
   } catch (error: any) {
@@ -19,12 +25,9 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, context: Params) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
     await connectDB();
     const data = await request.json();
     const blog = await Blog.findByIdAndUpdate(id, data, {
@@ -32,26 +35,34 @@ export async function PUT(
       runValidators: true,
     });
     if (!blog) {
-      return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
-    return NextResponse.json(blog);
+    revalidatePath("/blog");
+    revalidatePath("/admin/blogs");
+    revalidatePath(`/admin/blogs/${id}`);
+    if (blog.slug) {
+      revalidatePath(`/blog/${blog.slug}`);
+    }
+    return NextResponse.json({ message: "Blog updated successfully", blog });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest, context: Params) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
     await connectDB();
     const blog = await Blog.findByIdAndDelete(id);
     if (!blog) {
-      return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
-    return NextResponse.json({ message: 'Blog deleted successfully' });
+    revalidatePath("/blog");
+    revalidatePath("/admin/blogs");
+    if (blog.slug) {
+      revalidatePath(`/blog/${blog.slug}`);
+    }
+    return NextResponse.json({ message: "Blog deleted successfully" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

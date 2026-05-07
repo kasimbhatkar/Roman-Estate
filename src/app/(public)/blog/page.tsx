@@ -1,20 +1,23 @@
-import connectDB from '@/lib/mongodb';
-import Blog from '@/models/Blog';
-import BlogListingClient from './BlogListingClient';
-import type { Metadata } from 'next';
+import connectDB from "@/lib/mongodb";
+import Blog from "@/models/Blog";
+import BlogListingClient from "./BlogListingClient";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Real Estate Insights & News | Roman Estate',
-  description: 'Stay updated with the latest trends in Mumbai\'s real estate market, investment tips, and neighborhood guides.',
+  title: "Real Estate Insights & News | Roman Estate",
+  description:
+    "Stay updated with the latest trends in Mumbai's real estate market, investment tips, and neighborhood guides.",
 };
+
+export const dynamic = "force-dynamic";
 
 async function getBlogs() {
   try {
     await connectDB();
-    const blogs = await Blog.find({ published: true }).sort({ createdAt: -1 }).lean();
+    const blogs = await Blog.find({}).sort({ createdAt: -1 }).lean();
     return JSON.parse(JSON.stringify(blogs));
   } catch (error) {
-    console.error('Error fetching blogs:', error);
+    console.error("Error fetching blogs:", error);
     return [];
   }
 }
@@ -32,7 +35,8 @@ export default async function BlogListingPage() {
             Roman Estate <span className="text-blue-600">Insights</span>
           </h1>
           <p className="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed font-medium">
-            Stay updated with the latest trends in Mumbai's real estate market, investment tips, and neighborhood guides.
+            Stay updated with the latest trends in Mumbai's real estate market,
+            investment tips, and neighborhood guides.
           </p>
         </div>
       </div>

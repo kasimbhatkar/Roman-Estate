@@ -1,6 +1,8 @@
-import connectDB from '@/lib/mongodb';
-import Blog from '@/models/Blog';
-import AdminBlogsClient from './AdminBlogsClient';
+import connectDB from "@/lib/mongodb";
+import Blog from "@/models/Blog";
+import AdminBlogsClient from "./AdminBlogsClient";
+
+export const dynamic = "force-dynamic";
 
 async function getBlogs() {
   try {
@@ -8,7 +10,7 @@ async function getBlogs() {
     const blogs = await Blog.find({}).sort({ createdAt: -1 }).lean();
     return JSON.parse(JSON.stringify(blogs));
   } catch (error) {
-    console.error('Error fetching blogs:', error);
+    console.error("Error fetching blogs:", error);
     return [];
   }
 }

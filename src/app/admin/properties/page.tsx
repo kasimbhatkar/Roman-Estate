@@ -1,6 +1,8 @@
-import connectDB from '@/lib/mongodb';
-import Property from '@/models/Property';
-import AdminPropertiesClient from './AdminPropertiesClient';
+import connectDB from "@/lib/mongodb";
+import Property from "@/models/Property";
+import AdminPropertiesClient from "./AdminPropertiesClient";
+
+export const dynamic = "force-dynamic";
 
 async function getProperties() {
   try {
@@ -8,7 +10,7 @@ async function getProperties() {
     const properties = await Property.find({}).sort({ createdAt: -1 }).lean();
     return JSON.parse(JSON.stringify(properties));
   } catch (error) {
-    console.error('Error fetching properties:', error);
+    console.error("Error fetching properties:", error);
     return [];
   }
 }

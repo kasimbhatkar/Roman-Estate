@@ -1,12 +1,15 @@
-import connectDB from '@/lib/mongodb';
-import Property from '@/models/Property';
-import PropertiesClient from './PropertiesClient';
-import type { Metadata } from 'next';
+import connectDB from "@/lib/mongodb";
+import Property from "@/models/Property";
+import PropertiesClient from "./PropertiesClient";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Luxury Properties in Mumbai | Roman Estate',
-  description: 'Explore our curated selection of luxury apartments, villas, and commercial spaces in Mumbai. Find your next investment or dream home.',
+  title: "Luxury Properties in Mumbai | Roman Estate",
+  description:
+    "Explore our curated selection of luxury apartments, villas, and commercial spaces in Mumbai. Find your next investment or dream home.",
 };
+
+export const dynamic = "force-dynamic";
 
 async function getProperties() {
   try {
@@ -15,7 +18,7 @@ async function getProperties() {
     // Convert MongoDB objects to plain JSON
     return JSON.parse(JSON.stringify(properties));
   } catch (error) {
-    console.error('Error fetching properties:', error);
+    console.error("Error fetching properties:", error);
     return [];
   }
 }
@@ -33,7 +36,8 @@ export default async function PropertiesPage() {
             Properties for <span className="text-blue-600">Sale & Rent</span>
           </h1>
           <p className="text-xl text-gray-500 max-w-2xl leading-relaxed">
-            Discover your next investment or dream home in the heart of Mumbai. We bring you the most exclusive listings across the city.
+            Discover your next investment or dream home in the heart of Mumbai.
+            We bring you the most exclusive listings across the city.
           </p>
         </div>
       </div>

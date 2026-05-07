@@ -4,7 +4,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
-  tagTypes: ["Property", "Blog", "Inquiry"],
+  tagTypes: ["Property", "Blog", "Inquiry", "Partner"],
   endpoints: (builder) => ({
     // ─── Properties ───────────────────────────────────────
     createProperty: builder.mutation<any, any>({
@@ -79,6 +79,38 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Inquiry"],
     }),
+
+    // ─── Partners ────────────────────────────────────────
+    createPartner: builder.mutation<any, any>({
+      query: (data) => ({
+        url: "/partners",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Partner"],
+    }),
+
+    updatePartner: builder.mutation<any, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/partners/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Partner"],
+    }),
+
+    deletePartner: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/partners/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Partner"],
+    }),
+
+    getPartnerById: builder.query<any, string>({
+      query: (id) => `/partners/${id}`,
+      providesTags: ["Partner"],
+    }),
   }),
 });
 
@@ -93,4 +125,8 @@ export const {
   useDeleteBlogMutation,
   useGetBlogByIdQuery,
   useSubmitInquiryMutation,
+  useCreatePartnerMutation,
+  useUpdatePartnerMutation,
+  useDeletePartnerMutation,
+  useGetPartnerByIdQuery,
 } = apiSlice;

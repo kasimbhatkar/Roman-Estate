@@ -1,21 +1,23 @@
-'use client';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Home, 
-  FileText, 
-  MessageSquare, 
-  Settings, 
-  LogOut 
-} from 'lucide-react';
+"use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  Home,
+  FileText,
+  MessageSquare,
+  Settings,
+  LogOut,
+  Users,
+} from "lucide-react";
 
 const sidebarItems = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Properties', href: '/admin/properties', icon: Home },
-  { name: 'Blogs', href: '/admin/blogs', icon: FileText },
-  { name: 'Inquiries', href: '/admin/inquiries', icon: MessageSquare },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
+  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Properties", href: "/admin/properties", icon: Home },
+  { name: "Blogs", href: "/admin/blogs", icon: FileText },
+  { name: "Partners", href: "/admin/partners", icon: Users },
+  { name: "Inquiries", href: "/admin/inquiries", icon: MessageSquare },
+  { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 export default function AdminLayout({
@@ -42,8 +44,8 @@ export default function AdminLayout({
                 href={item.href}
                 className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
                 <Icon className="w-5 h-5 mr-3" />
@@ -64,7 +66,8 @@ export default function AdminLayout({
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-8">
           <h1 className="text-xl font-semibold text-gray-800">
-            {sidebarItems.find(item => item.href === pathname)?.name || 'Admin'}
+            {sidebarItems.find((item) => item.href === pathname)?.name ||
+              "Admin"}
           </h1>
           <div className="flex items-center space-x-4">
             <span className="text-sm text-gray-500">Administrator</span>
@@ -73,9 +76,7 @@ export default function AdminLayout({
             </div>
           </div>
         </header>
-        <div className="flex-1 overflow-y-auto p-8">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto p-8">{children}</div>
       </main>
     </div>
   );

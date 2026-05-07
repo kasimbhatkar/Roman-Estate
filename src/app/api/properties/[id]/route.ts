@@ -1,18 +1,24 @@
-import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Property from '@/models/Property';
+import { NextResponse } from "next/server";
+import connectDB from "@/lib/mongodb";
+import Property from "@/models/Property";
+import { revalidatePath } from "next/cache";
+
+export const dynamic = "force-dynamic";
 
 // GET a single property
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     await connectDB();
     const property = await Property.findById(id);
     if (!property) {
-      return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Property not found" },
+        { status: 404 },
+      );
     }
     return NextResponse.json(property);
   } catch (error: any) {
@@ -23,10 +29,10 @@ export async function GET(
 // UPDATE a property
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     await connectDB();
     const data = await request.json();
     const property = await Property.findByIdAndUpdate(id, data, {
@@ -34,9 +40,19 @@ export async function PUT(
       runValidators: true,
     });
     if (!property) {
-      return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Property not found" },
+        { status: 404 },
+      );
     }
-    return NextResponse.json(property);
+    revalidatePath("/properties");
+    revalidatePath("/admin/properties");
+    revalidatePath(`/properties/${id}`);
+    revalidatePath(`/admin/properties/${id}`);
+    return NextResponse.json({
+      message: "Property updated successfully",
+      property,
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -45,16 +61,21 @@ export async function PUT(
 // DELETE a property
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     await connectDB();
     const property = await Property.findByIdAndDelete(id);
     if (!property) {
-      return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Property not found" },
+        { status: 404 },
+      );
     }
-    return NextResponse.json({ message: 'Property deleted successfully' });
+    revalidatePath("/properties");
+    revalidatePath("/admin/properties");
+    return NextResponse.json({ message: "Property deleted successfully" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

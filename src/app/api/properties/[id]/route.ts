@@ -1,17 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Property from "@/models/Property";
 import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
+type Params = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
 // GET a single property
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } },
-) {
+export async function GET(request: NextRequest, context: Params) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
     await connectDB();
     const property = await Property.findById(id);
     if (!property) {
@@ -27,12 +30,9 @@ export async function GET(
 }
 
 // UPDATE a property
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } },
-) {
+export async function PUT(request: NextRequest, context: Params) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
     await connectDB();
     const data = await request.json();
     const property = await Property.findByIdAndUpdate(id, data, {
@@ -59,12 +59,9 @@ export async function PUT(
 }
 
 // DELETE a property
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(request: NextRequest, context: Params) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
     await connectDB();
     const property = await Property.findByIdAndDelete(id);
     if (!property) {

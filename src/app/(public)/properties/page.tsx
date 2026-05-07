@@ -13,10 +13,17 @@ export const dynamic = "force-dynamic";
 
 async function getProperties() {
   try {
-    await connectDB();
-    const properties = await Property.find({}).sort({ createdAt: -1 }).lean();
-    // Convert MongoDB objects to plain JSON
-    return JSON.parse(JSON.stringify(properties));
+    // The `fetch` call is implicitly being used by Next.js when rendering this page.
+    // To ensure we get fresh data, we can re-fetch from our own API endpoint
+    // with caching disabled. This is more explicit for production environments.
+    const res = await fetch(`${process.env.NEXTAUTH_URL}/api/properties`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      throw new Error("Failed to fetch properties");
+    }
+    const properties = await res.json();
+    return properties;
   } catch (error) {
     console.error("Error fetching properties:", error);
     return [];
